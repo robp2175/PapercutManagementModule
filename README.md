@@ -9,11 +9,9 @@ Open the project file and build the project, which will result in a PapercutMana
 
 You might also need to add xmlrpcnet reference from NuGet (xmlrpcnet.3.0.0.266). However, I have included the dll in packages. 
 
-How to use:
-Import-Module .\PapercutManagement.dll
-
-  To see available cmdlets
-  Get-Command -Module PapercutManagement
+#How to use:
+* Import-Module .\PapercutManagement.dll
+* To see available cmdlets: Get-Command -Module PapercutManagement
 
 #To connect to Papcercut Server
 #IP of connecting machine must be added to papercut server and API enabled. 

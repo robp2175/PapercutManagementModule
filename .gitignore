@@ -12,6 +12,7 @@ TestResults
 *.suo
 *.user
 *.sln.docstates
+PapercutManagement/PapercutManagement.csproj
 
 # Build results
 [Dd]ebug/

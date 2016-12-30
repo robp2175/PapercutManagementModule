@@ -259,6 +259,42 @@ namespace PapercutManagement
         }
     }
 
+    [Cmdlet(VerbsCommon.Add, "pcutSharedAccount")]
+    public class Add_PcutSharedAccount : Cmdlet
+    {
+        [Parameter(Mandatory = true,
+            HelpMessage = "Please provide the current username")]
+        [ValidateNotNullOrEmpty]
+        public string SharedAccountName;
+
+        static ServerCommandProxy _serverProxy;
+
+        protected override void ProcessRecord()
+        {
+            base.ProcessRecord();
+            if (Globals.authToken != null)
+            {
+                _serverProxy = new ServerCommandProxy(Globals.ComputerName, Globals.Port, Globals.authToken);
+                try
+                {
+                    _serverProxy.AddNewSharedAccount(SharedAccountName);
+                    PSObject returnAddNewSharedAccount = new PSObject();
+                    returnAddNewSharedAccount.Properties.Add(new PSNoteProperty("SharedAccount", SharedAccountName));                    
+                    WriteObject(returnAddNewSharedAccount);
+                }
+                catch (XmlRpcFaultException fex)
+                {
+                    ErrorRecord errRecord = new ErrorRecord(new Exception(fex.Message, fex.InnerException), fex.FaultString, ErrorCategory.NotSpecified, fex);
+                    WriteError(errRecord);
+                }
+            }
+            else
+            {
+                WriteObject("Please run Connect-PcutServer in order to establish connection.");
+            }
+        }
+    }
+
     [Cmdlet(VerbsCommon.Remove, "pcutAdminAccessUser")]
     public class Remove_PcutAdminAccessUser : Cmdlet
     {
@@ -588,6 +624,54 @@ namespace PapercutManagement
                         returnPcutSharedAccounts.Add(thisSharedAccount);
                     }
                     WriteObject(returnPcutSharedAccounts);
+                }
+                catch (XmlRpcFaultException fex)
+                {
+                    ErrorRecord errRecord = new ErrorRecord(new Exception(fex.Message, fex.InnerException), fex.FaultString, ErrorCategory.NotSpecified, fex);
+                    WriteError(errRecord);
+                }
+            }
+            else
+            {
+                WriteObject("Please run Connect-PcutServer in order to establish connection.");
+            }
+        }
+    }
+
+    [Cmdlet(VerbsCommon.Set, "pcutSharedAccountProperty")]
+    public class Set_PcutSharedAccountProperty : Cmdlet
+    {
+        [Parameter(Mandatory = true,
+            HelpMessage = "Please provide the current username")]
+        [ValidateNotNullOrEmpty]
+        public string UserName;
+
+        [Parameter(Mandatory = true,
+            HelpMessage = "Please enter a valid propertyName Valid options include: card-number, card-pin, department, email, full-name, notes, office,")]
+        [ValidateSet(new string[] { "access-groups", "access-users", "balance", "comment-option", "disabled", "invoice-option", "notes", "pin", "restricted" })]
+        public string PropertyName;
+
+        [Parameter(Mandatory = true,
+            HelpMessage = "Please provide a propertyValue")]
+        [ValidateNotNullOrEmpty]
+        public string PropertyValue;
+
+        static ServerCommandProxy _serverProxy;
+
+        protected override void ProcessRecord()
+        {
+            base.ProcessRecord();
+            if (Globals.authToken != null)
+            {
+                _serverProxy = new ServerCommandProxy(Globals.ComputerName, Globals.Port, Globals.authToken);
+                try
+                {
+                    _serverProxy.SetSharedAccountProperty(UserName, PropertyName, PropertyValue);
+                    PSObject returnSetSharedAccountProperty = new PSObject();
+                    returnSetSharedAccountProperty.Properties.Add(new PSNoteProperty("Username", UserName));
+                    returnSetSharedAccountProperty.Properties.Add(new PSNoteProperty("propertyName", PropertyName));
+                    returnSetSharedAccountProperty.Properties.Add(new PSNoteProperty("propertyValue", PropertyValue));
+                    WriteObject(returnSetSharedAccountProperty);
                 }
                 catch (XmlRpcFaultException fex)
                 {

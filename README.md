@@ -12,7 +12,7 @@ You might also need to add xmlrpcnet reference from NuGet (xmlrpcnet.3.0.0.266).
 #How to use:
 * Import-Module .\PapercutManagement.dll
 * To see available cmdlets: Get-Command -Module PapercutManagement
-* Connect to Papercut Server:
-  * IP of connecting machine must be added to papercut server and API enabled. 
+* Connect to Papercut Server: Connect-pcutServer -ComputerName PcutServerName -authToken adminPassword
+  * IP of connecting machine must be added to papercut server and API enabled. Options > Advanced > Allowed XML Web Services callers.
 
 

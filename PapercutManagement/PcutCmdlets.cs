@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
@@ -332,6 +332,43 @@ namespace PapercutManagement
         }
     }
 
+    [Cmdlet(VerbsCommon.Remove, "pcutUser")]
+    public class Remove_PcutUser : Cmdlet
+    {
+        [Parameter(Mandatory = true,
+            HelpMessage = "Please provide the current username")]
+        [ValidateNotNullOrEmpty]
+        public string UserName;
+
+        static ServerCommandProxy _serverProxy;
+
+        protected override void ProcessRecord()
+        {
+            base.ProcessRecord();
+            if (Globals.authToken != null)
+            {
+                _serverProxy = new ServerCommandProxy(Globals.ComputerName, Globals.Port, Globals.authToken);
+                try
+                {
+                    _serverProxy.DeleteExistingUser(UserName);
+                    PSObject returnRemovePcutUser = new PSObject();
+                    returnRemovePcutUser.Properties.Add(new PSNoteProperty("Username", UserName));
+                    returnRemovePcutUser.Properties.Add(new PSNoteProperty("Deleted", true));
+                    WriteObject(returnRemovePcutUser);
+                }
+                catch (XmlRpcFaultException fex)
+                {
+                    ErrorRecord errRecord = new ErrorRecord(new Exception(fex.Message, fex.InnerException), fex.FaultString, ErrorCategory.NotSpecified, fex);
+                    WriteError(errRecord);
+                }
+            }
+            else
+            {
+                WriteObject("Please run Connect-PcutServer in order to establish connection.");
+            }
+        }
+    }
+
     [Cmdlet(VerbsData.Update, "pcutInternalAdminPassword")]
     public class Update_PcutInternalAdminPassword : Cmdlet
     {
@@ -512,6 +549,45 @@ namespace PapercutManagement
                 {
                     ErrorRecord errRecord = new ErrorRecord(new Exception(ex.Message, ex.InnerException), ex.HResult.ToString(), new ErrorCategory(), ex);
                 }
+            }
+        }
+    }
+
+    [Cmdlet(VerbsCommon.Get, "pcutUserByIdNo")]
+    public class Get_PcutUserByIdNo : Cmdlet
+    {
+        [Parameter(Mandatory = true,
+            HelpMessage = "Please provide the user's ID number")]
+        [ValidateNotNullOrEmpty]
+        public string Id;
+
+        string pcutUser = null;
+
+        static ServerCommandProxy _serverProxy;
+
+        protected override void ProcessRecord()
+        {
+            base.ProcessRecord();
+            if (Globals.authToken != null)
+            {
+                _serverProxy = new ServerCommandProxy(Globals.ComputerName, Globals.Port, Globals.authToken);
+                try
+                {
+                    pcutUser = _serverProxy.LookUpUserNameByIDNo(Id);
+                    PSObject returnPcutUser = new PSObject();
+                    returnPcutUser.Properties.Add(new PSNoteProperty("Id", Id));
+                    returnPcutUser.Properties.Add(new PSNoteProperty("UserName", pcutUser));
+                    WriteObject(returnPcutUser);
+                }
+                catch (XmlRpcFaultException fex)
+                {
+                    ErrorRecord errRecord = new ErrorRecord(new Exception(fex.Message, fex.InnerException), fex.FaultString, ErrorCategory.NotSpecified, fex);
+                    WriteError(errRecord);
+                }
+            }
+            else
+            {
+                WriteObject("Please run Connect-PcutServer in order to establish connection.");
             }
         }
     }
